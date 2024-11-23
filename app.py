@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def welcome():
-    return "welcome in time_and_date"
+    return "welcome in time_and_date server"
 
 @app.route("/dt", methods=['GET'])
 def time_and_date():
