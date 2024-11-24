@@ -26,7 +26,6 @@ def time_and_date():
         'date': date_string,
         'time': time_string
     }
-
     return jsonify(response)
 
 if __name__ == '__main__':
