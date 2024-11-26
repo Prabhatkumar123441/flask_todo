@@ -66,4 +66,7 @@ def divide_route():
         return jsonify({"error": "Invalid input, please provide x and y as numbers"}), 400
 
 if __name__ == "__main__":
-    app.run()
+    # app.run()
+    http_port = 5000
+    httpd = WSGIServer(("0.0.0.0", http_port), app.wsgi_app, spawn=5)
+    httpd.serve_forever()
