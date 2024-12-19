@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .navbar {
+            background-color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            color: #f2f2f2;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .navbar .logo {
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #f2f2f2;
+        }
+        .profile-dropdown {
+            display: flex;
+            align-items: center;
+            position: relative; /* Ensure relative positioning for dropdown */
+        }
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .dropdown-toggle {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #f2f2f2;
+        }
+        .dropdown-menu {
+            position: absolute;
+            right: 0; /* Aligns dropdown to the right */
+            background-color: #333;
+            min-width: 120px;
+            padding: 10px;
+            display: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000; /* Ensure dropdown appears above other elements */
+        }
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+        .dropdown-item {
+            color: #f2f2f2;
+            text-decoration: none;
+            display: block;
+            padding: 5px 10px;
+        }
+        .dropdown-item:hover {
+            background-color: #444; /* Highlight on hover */
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+        }
+        input[type="text"], input[type="submit"] {
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: calc(100% - 22px);
+        }
+        input[type="submit"] {
+            background-color: #5cb85c;
+            color: white;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #4cae4c;
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        .shiftleft {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a class="logo" href="#home">{{ username }}'s cloud space</a>
+        <div class="profile-dropdown">
+            <img class="profile-pic" src="/static/pi.jpg" alt="Profile Picture">
+            <div class="dropdown">
+                <button class="dropdown-toggle" type="button">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#username">{{ username }}</a>
+                    <a class="dropdown-item" href="/logout">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="shiftleft">
+        <h1>Welcome, {{ username }}!</h1>
+        <p>This is your space where you can add your todo list or complete your tasks.</p>
+
+        <form action="/add_todo" method="POST">
+            <label for="todo">Todo:</label>
+            <input type="text" id="todo" name="todo" required placeholder="Enter your todo item">
+            <label for="description">Description:</label>
+            <input type="text" id="description" name="description" required placeholder="Enter a brief description">
+            <input type="submit" value="Add">
+        </form>
+
+        <div class="search-container">
+            <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for todos...">
+        </div>
+
+        <table id="todoTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Todo</th>
+                    <th>Description</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for todo in todos %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ todo[0] }}</td>
+                    <td>{{ todo[1] }}</td>
+                    <td><a href="/delete/{{ todo[0] }}/{{ todo[1] }}" style="color: red;">Delete</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <script>
+        function myFunction() {
+            const input = document.getElementById('myInput');
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById('todoTable');
+            const rows = table.getElementsByTagName('tr');
+    
+            for (let i = 1; i < rows.length; i++) { // Start from 1 to skip the header
+                const cells = rows[i].getElementsByTagName('td');
+                let found = false;
+    
+                for (let j = 0; j < cells.length; j++) {
+                    const cellText = cells[j].textContent || cells[j].innerText;
+    
+                    if (cellText.toLowerCase().indexOf(filter) > -1) {
+                        found = true;
+                        break;
+                    }
+                }
+    
+                rows[i].style.display = found ? '' : 'none';
+            }
+        }
+    </script>
+</body>
+</html>
+
