@@ -7,11 +7,11 @@ env = os.getenv("ENV", "dev")
 
 
 class Config(object):
-    def __init__(self):
-        self.httpport = 5000
-        if(env == "dev"):
-            self.database = 'DataBase.db' 
-            self.debug = True
-        elif(env == "stg"):
-            self.debug = True
-            pass
+    # def __init__(self):
+    httpport = 5000
+    if(env == "dev"):
+        database = 'DataBase.db' 
+        debug = True
+    elif(env == "stg"):
+        debug = False
+    pass
