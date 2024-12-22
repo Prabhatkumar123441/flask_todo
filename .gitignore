@@ -1,9 +1,9 @@
 # Ignore all .pyc files
 *.pyc
 
+
 # Ignore all files ending with .log
 *.log
-
 
 
 # Ignore all files ending with .DS_Store
