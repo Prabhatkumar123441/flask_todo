@@ -29,8 +29,17 @@ def printheaders(f):
         return f(*args, **kwargs)
     return printallheaders
 
+def session_required(f):
+    @wraps(f) 
+    def decorator_function(*args, **kwargs):
+        if 'username' not in session : 
+            return render_template('home.html')
+        return f(*args, **kwargs)
+    return decorator_function
+
 @user_r.route('/delete/<todo>/<des>')
 @printheaders
+@session_required
 def delete_row(todo,des):
     conn = sqlite3.connect(Config.database)
     cursor = conn.cursor()
@@ -47,6 +56,7 @@ def delete_row(todo,des):
 
 @user_r.route("/delete_all_todos",methods = ['DELETE'])
 @printheaders
+@session_required
 def delete_all_todos():
     global todos
     todos.clear()
@@ -67,6 +77,7 @@ def delete_all_todos():
 
 @user_r.route('/add_todo', methods=['POST'])
 @printheaders
+@session_required
 @validate(form=TodoForm)
 def add_todo(form: TodoForm):
 
@@ -115,6 +126,7 @@ def add_todo(form: TodoForm):
     
 @user_r.route('/user')
 @printheaders
+@session_required
 def user():
     # username = request.args.get('username')
     username = session['username']
@@ -131,11 +143,12 @@ def user():
     todos = cursor.fetchall()
     message = "successfull login"
     flash(message)
-    return  render_template('user_space.html',todos = todos,username = username)
+    return render_template('user_space.html',todos = todos,username = username)
 
 
 @user_r.route('/logout')
 @printheaders
+@session_required
 def logout():
     if session['username']:
         session['username'] = None

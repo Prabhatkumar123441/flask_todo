@@ -1,6 +1,5 @@
 from config import Config
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash, abort
-import sqlite3 as sql
 import sqlite3
 from servers.flask.responsebuilder import ResponseBuilder
 from config  import Config
@@ -25,7 +24,7 @@ class FlaskServer(object):
     app = Flask(__name__, template_folder = os.path.abspath('./templates'), static_folder = os.path.abspath('./static'))
     app.debug = True
     app.secret_key = 'your_secret_key'
-    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=2)
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)
 
     app.register_blueprint(user_r)
     app.register_blueprint(login_r)
@@ -57,6 +56,14 @@ class FlaskServer(object):
             return f(*args, **kwargs)
         return printallheaders
 
+     
+    def session_required(f):
+        @wraps(f) 
+        def decorator_function(*args, **kwargs):
+            if 'username' not in session : 
+                return render_template('home.html')
+            return f(*args, **kwargs)
+        return decorator_function
 
     @app.route("/hello", methods = ['GET'])
     @printheaders
@@ -66,6 +73,7 @@ class FlaskServer(object):
 
     @app.route('/update', methods=['POST'])
     @printheaders
+    @session_required
     def update():
         data = request.get_json()
         todo = data.get('todo')
@@ -74,6 +82,7 @@ class FlaskServer(object):
         
     @app.route('/')
     @printheaders
+    @session_required
     def home():
         
         if "username" in session:
@@ -139,6 +148,7 @@ class FlaskServer(object):
 
     @app.route('/get_all_todos')
     @printheaders
+    @session_required
     def get_all_todos():
         username = session['username']
         conn = sqlite3.connect(Config().database)
@@ -171,7 +181,8 @@ class FlaskServer(object):
         FlaskServer.create_table()
         port = Config.httpport
         if Config.debug:
-            FlaskServer.app.run(debug = True)
+            # FlaskServer.app.run(port = port, debug = True)
+            FlaskServer.app.run(host = "0.0.0.0", port = port, debug = True)
         else:
             flask_wsgi_server = WSGIServer(("0.0.0.0", port),FlaskServer.app.wsgi_app, spawn=10)
             flask_wsgi_server.serve_forever()
